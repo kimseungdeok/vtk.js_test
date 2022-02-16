@@ -1,0 +1,30 @@
+{
+  "name": "vtk.js_test",
+  "version": "1.0.0",
+  "description": "vtk.js 빌드 및 렌더링 테스트 레파지토리",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --progress --mode=production",
+    "dev": "webpack-dev-server --mode=development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kimseungdeok/vtk.js_test.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kimseungdeok/vtk.js_test/issues"
+  },
+  "homepage": "https://github.com/kimseungdeok/vtk.js_test#readme",
+  "dependencies": {
+    "@kitware/vtk.js": "^22.5.4"
+  },
+  "devDependencies": {
+    "kw-web-suite": "^11.1.0",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4"
+  }
+}
