@@ -5,67 +5,109 @@ import '@kitware/vtk.js/Rendering/Profiles/Geometry';
 
 import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow';
 import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
-import vtkConeSource from '@kitware/vtk.js/Filters/Sources/ConeSource';
+import vtkSphereSource from '@kitware/vtk.js/Filters/Sources/SphereSource';
+import vtkCursor3D from '@kitware/vtk.js/Filters/Sources/Cursor3D';
 import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
 
 // import controlPanel from './controlPanel.html';
 const controlPanel = `
 <table>
-    <tr>
-      <td>Height</td>
-      <td colspan="3">
-        <input class='height' type="range" min="0.5" max="2.0" step="0.1" value="1.0" />
-      </td>
-    </tr>
-    <tr>
-      <td>Radius</td>
-      <td colspan="3">
-        <input class='radius' type="range" min="0.5" max="2.0" step="0.1" value="1.0" />
-      </td>
-    </tr>
-    <tr>
-      <td>Resolution</td>
-      <td colspan="3">
-        <input class='resolution' type="range" min="4" max="100" step="1" value="6" />
-      </td>
-    </tr>
-    <tr>
-      <td>Capping</td>
-      <td colspan="3">
-        <input class='capping' type="checkbox" checked />
-      </td>
-    </tr>
-  <tr style="text-align: center;">
-      <td></td>
-      <td>X</td>
-      <td>Y</td>
-      <td>Z</td>
-    </tr>
-    <tr>
-      <td>Origin</td>
-      <td>
-        <input style="width: 50px" class='center' data-index="0" type="range" min="-1" max="1" step="0.1" value="0" />
-      </td>
-      <td>
-        <input style="width: 50px" class='center' data-index="1" type="range" min="-1" max="1" step="0.1" value="0" />
-      </td>
-      <td>
-        <input style="width: 50px" class='center' data-index="2" type="range" min="-1" max="1" step="0.1" value="0" />
-      </td>
-    </tr>
-    <tr>
-      <td>Direction</td>
-      <td>
-        <input style="width: 50px" class='direction' data-index="0" type="range" min="-1" max="1" step="0.1" value="1" />
-      </td>
-      <td>
-        <input style="width: 50px" class='direction' data-index="1" type="range" min="-1" max="1" step="0.1" value="0" />
-      </td>
-      <td>
-        <input style="width: 50px" class='direction' data-index="2" type="range" min="-1" max="1" step="0.1" value="0" />
-      </td>
-    </tr>
-  </table>
+<tr>
+  <td>Focal X</td>
+  <td>
+    <input type="range" name="" id="focalPointX" min="-10" max="10" step="1" value="0">
+  </td>
+</tr>
+<tr>
+  <td>Focal Y</td>
+  <td>
+    <input type="range" name="" id="focalPointY" min="-10" max="10" step="1" value="0">
+  </td>
+</tr>
+<tr>
+  <td>Focal Z</td>
+  <td>
+    <input type="range" name="" id="focalPointZ" min="-10" max="10" step="1" value="0">
+  </td>
+</tr>
+<tr>
+  <td>Model Bounds X Min</td>
+  <td>
+    <input type="range" name="" id="modelBoundsXMin" min="-10" max="10" step="1" value="-10">
+  </td>
+</tr>
+<tr>
+  <td>Model Bounds X Max</td>
+  <td>
+    <input type="range" name="" id="modelBoundsXMax" min="-10" max="10" step="1" value="10">
+  </td>
+</tr>
+<tr>
+  <td>Model Bounds Y Min</td>
+  <td>
+    <input type="range" name="" id="modelBoundsYMin" min="-10" max="10" step="1" value="-10">
+  </td>
+</tr>
+<tr>
+  <td>Model Bounds Y Max</td>
+  <td>
+    <input type="range" name="" id="modelBoundsYMax" min="-10" max="10" step="1" value="10">
+  </td>
+</tr>
+<tr>
+  <td>Model Bounds Z Min</td>
+  <td>
+    <input type="range" name="" id="modelBoundsZMin" min="-10" max="10" step="1" value="-10">
+  </td>
+</tr>
+<tr>
+  <td>Model Bounds Z Max</td>
+  <td>
+    <input type="range" name="" id="modelBoundsZMax" min="-10" max="10" step="1" value="10">
+  </td>
+</tr>
+<tr>
+  <td>Outline</td>
+  <td>
+    <input type="checkbox" name="" id="outline" checked>
+  </td>
+</tr>
+<tr>
+  <td>Axes</td>
+  <td>
+    <input type="checkbox" name="" id="axes" checked>
+  </td>
+</tr>
+<tr>
+  <td>X Shadows</td>
+  <td>
+    <input type="checkbox" name="" id="xShadows" checked>
+  </td>
+</tr>
+<tr>
+  <td>Y Shadows</td>
+  <td>
+    <input type="checkbox" name="" id="yShadows" checked>
+  </td>
+</tr>
+<tr>
+  <td>Z Shadows</td>
+  <td>
+    <input type="checkbox" name="" id="zShadows" checked>
+  </td>
+</tr>
+<tr>
+  <td>Wrap</td>
+  <td>
+    <input type="checkbox" name="" id="wrap">
+  </td>
+</tr>
+<tr>
+  <td>TranslationMode</td>
+  <td>
+    <input type="checkbox" name="" id="translationMode">
+  </td>
+</tr>
 `
 
 // ----------------------------------------------------------------------------
@@ -81,25 +123,22 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // ----------------------------------------------------------------------------
 // Example code
 // ----------------------------------------------------------------------------
+const cursor3D = vtkCursor3D.newInstance();
+cursor3D.setFocalPoint([0, 0, 0]);
+cursor3D.setModelBounds([-10, 10, -10, 10, -10, 10]);
+const cursor3DMapper = vtkMapper.newInstance();
+cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
+const cursor3DActor = vtkActor.newInstance();
+cursor3DActor.setMapper(cursor3DMapper);
 
-function createConePipeline() {
-  const coneSource = vtkConeSource.newInstance();
-  const actor = vtkActor.newInstance();
-  const mapper = vtkMapper.newInstance();
+const sphereSource = vtkSphereSource.newInstance();
+const sphererMapper = vtkMapper.newInstance();
+sphererMapper.setInputConnection(sphereSource.getOutputPort());
+const sphereActor = vtkActor.newInstance();
+sphereActor.setMapper(sphererMapper);
 
-  actor.setMapper(mapper);
-  mapper.setInputConnection(coneSource.getOutputPort());
-
-  renderer.addActor(actor);
-  return { coneSource, mapper, actor };
-}
-
-const pipelines = [createConePipeline(), createConePipeline()];
-
-// Create red wireframe baseline
-pipelines[0].actor.getProperty().setRepresentation(1);
-pipelines[0].actor.getProperty().setColor(1, 0, 0);
-
+renderer.addActor(cursor3DActor);
+renderer.addActor(sphereActor);
 renderer.resetCamera();
 renderWindow.render();
 
@@ -108,50 +147,58 @@ renderWindow.render();
 // -----------------------------------------------------------
 
 fullScreenRenderer.addController(controlPanel);
-
-['height', 'radius', 'resolution'].forEach((propertyName) => {
-  document.querySelector(`.${propertyName}`).addEventListener('input', (e) => {
-    const value = Number(e.target.value);
-    pipelines[0].coneSource.set({ [propertyName]: value });
-    pipelines[1].coneSource.set({ [propertyName]: value });
-    renderWindow.render();
-  });
-});
-
-document.querySelector('.capping').addEventListener('change', (e) => {
-  const capping = !!e.target.checked;
-  pipelines[0].coneSource.set({ capping });
-  pipelines[1].coneSource.set({ capping });
+const focalPointRanges = ['focalPointX', 'focalPointY', 'focalPointZ'].map(
+  (id) => document.getElementById(id)
+);
+const handleFocalPointInput = (e) => {
+  cursor3D.setFocalPoint([
+    focalPointRanges[0].value,
+    focalPointRanges[1].value,
+    focalPointRanges[2].value,
+  ]);
+  renderer.resetCameraClippingRange();
   renderWindow.render();
-});
-
-const centerElems = document.querySelectorAll('.center');
-const directionElems = document.querySelectorAll('.direction');
-
-function updateTransformedCone() {
-  const center = [0, 0, 0];
-  const direction = [1, 0, 0];
-  for (let i = 0; i < 3; i++) {
-    center[Number(centerElems[i].dataset.index)] = Number(centerElems[i].value);
-    direction[Number(directionElems[i].dataset.index)] = Number(
-      directionElems[i].value
-    );
-  }
-  console.log('updateTransformedCone', center, direction);
-  pipelines[1].coneSource.set({ center, direction });
+};
+focalPointRanges.forEach((input) =>
+  input.addEventListener('input', handleFocalPointInput)
+);
+const modelBoundsRanges = [
+  'modelBoundsXMin',
+  'modelBoundsXMax',
+  'modelBoundsYMin',
+  'modelBoundsYMax',
+  'modelBoundsZMin',
+  'modelBoundsZMax',
+].map((id) => document.getElementById(id));
+const handleModelBoundsInput = (e) => {
+  cursor3D.setModelBounds([
+    modelBoundsRanges[0].value,
+    modelBoundsRanges[1].value,
+    modelBoundsRanges[2].value,
+    modelBoundsRanges[3].value,
+    modelBoundsRanges[4].value,
+    modelBoundsRanges[5].value,
+  ]);
+  renderer.resetCameraClippingRange();
   renderWindow.render();
-}
-
-for (let i = 0; i < 3; i++) {
-  centerElems[i].addEventListener('input', updateTransformedCone);
-  directionElems[i].addEventListener('input', updateTransformedCone);
-}
-
-// -----------------------------------------------------------
-// Make some variables global so that you can inspect and
-// modify objects in your browser's developer console:
-// -----------------------------------------------------------
-
-global.pipelines = pipelines;
-global.renderer = renderer;
-global.renderWindow = renderWindow;
+};
+modelBoundsRanges.forEach((input) =>
+  input.addEventListener('input', handleModelBoundsInput)
+);
+const checkBoxes = [
+  'outline',
+  'axes',
+  'xShadows',
+  'yShadows',
+  'zShadows',
+  'wrap',
+  'translationMode',
+].map((id) => document.getElementById(id));
+const handleCheckBoxInput = (e) => {
+  cursor3D.set({ [e.target.id]: e.target.checked });
+  renderer.resetCameraClippingRange();
+  renderWindow.render();
+};
+checkBoxes.forEach((checkBox) =>
+  checkBox.addEventListener('input', handleCheckBoxInput)
+);
