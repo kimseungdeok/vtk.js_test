@@ -5,109 +5,49 @@ import '@kitware/vtk.js/Rendering/Profiles/Geometry';
 
 import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow';
 import vtkActor from '@kitware/vtk.js/Rendering/Core/Actor';
-import vtkSphereSource from '@kitware/vtk.js/Filters/Sources/SphereSource';
-import vtkCursor3D from '@kitware/vtk.js/Filters/Sources/Cursor3D';
+import vtkLineSource from '@kitware/vtk.js/Filters/Sources/LineSource';
 import vtkMapper from '@kitware/vtk.js/Rendering/Core/Mapper';
+import { Representation } from '@kitware/vtk.js/Rendering/Core/Property/Constants';
 
-// import controlPanel from './controlPanel.html';
 const controlPanel = `
 <table>
-<tr>
-  <td>Focal X</td>
-  <td>
-    <input type="range" name="" id="focalPointX" min="-10" max="10" step="1" value="0">
-  </td>
-</tr>
-<tr>
-  <td>Focal Y</td>
-  <td>
-    <input type="range" name="" id="focalPointY" min="-10" max="10" step="1" value="0">
-  </td>
-</tr>
-<tr>
-  <td>Focal Z</td>
-  <td>
-    <input type="range" name="" id="focalPointZ" min="-10" max="10" step="1" value="0">
-  </td>
-</tr>
-<tr>
-  <td>Model Bounds X Min</td>
-  <td>
-    <input type="range" name="" id="modelBoundsXMin" min="-10" max="10" step="1" value="-10">
-  </td>
-</tr>
-<tr>
-  <td>Model Bounds X Max</td>
-  <td>
-    <input type="range" name="" id="modelBoundsXMax" min="-10" max="10" step="1" value="10">
-  </td>
-</tr>
-<tr>
-  <td>Model Bounds Y Min</td>
-  <td>
-    <input type="range" name="" id="modelBoundsYMin" min="-10" max="10" step="1" value="-10">
-  </td>
-</tr>
-<tr>
-  <td>Model Bounds Y Max</td>
-  <td>
-    <input type="range" name="" id="modelBoundsYMax" min="-10" max="10" step="1" value="10">
-  </td>
-</tr>
-<tr>
-  <td>Model Bounds Z Min</td>
-  <td>
-    <input type="range" name="" id="modelBoundsZMin" min="-10" max="10" step="1" value="-10">
-  </td>
-</tr>
-<tr>
-  <td>Model Bounds Z Max</td>
-  <td>
-    <input type="range" name="" id="modelBoundsZMax" min="-10" max="10" step="1" value="10">
-  </td>
-</tr>
-<tr>
-  <td>Outline</td>
-  <td>
-    <input type="checkbox" name="" id="outline" checked>
-  </td>
-</tr>
-<tr>
-  <td>Axes</td>
-  <td>
-    <input type="checkbox" name="" id="axes" checked>
-  </td>
-</tr>
-<tr>
-  <td>X Shadows</td>
-  <td>
-    <input type="checkbox" name="" id="xShadows" checked>
-  </td>
-</tr>
-<tr>
-  <td>Y Shadows</td>
-  <td>
-    <input type="checkbox" name="" id="yShadows" checked>
-  </td>
-</tr>
-<tr>
-  <td>Z Shadows</td>
-  <td>
-    <input type="checkbox" name="" id="zShadows" checked>
-  </td>
-</tr>
-<tr>
-  <td>Wrap</td>
-  <td>
-    <input type="checkbox" name="" id="wrap">
-  </td>
-</tr>
-<tr>
-  <td>TranslationMode</td>
-  <td>
-    <input type="checkbox" name="" id="translationMode">
-  </td>
-</tr>
+  <tr>
+    <td>Resolution</td>
+    <td colspan="3">
+      <input style="width: 100%" class='resolution' type="range" min="1" max="25" step="1" value="10" />
+    </td>
+  </tr>
+  <tr style="text-align: center;">
+    <td></td>
+    <td>X</td>
+    <td>Y</td>
+    <td>Z</td>
+  </tr>
+  <tr>
+    <td>Point  1</td>
+    <td>
+      <input style="width: 50px" class='x1' type="range" min="-1" max="1" step="0.1" value="-1" />
+    </td>
+    <td>
+      <input style="width: 50px" class='y1' type="range" min="-1" max="1" step="0.1" value="0" />
+    </td>
+    <td>
+      <input style="width: 50px" class='z1' type="range" min="-1" max="1" step="0.1" value="0" />
+    </td>
+  </tr>
+  <tr>
+    <td>Point  2</td>
+    <td>
+      <input style="width: 50px" class='x2' type="range" min="-1" max="1" step="0.1" value="1" />
+    </td>
+    <td>
+      <input style="width: 50px" class='y2' type="range" min="-1" max="1" step="0.1" value="0" />
+    </td>
+    <td>
+      <input style="width: 50px" class='z2' type="range" min="-1" max="1" step="0.1" value="0" />
+    </td>
+  </tr>
+</table>
 `
 
 // ----------------------------------------------------------------------------
@@ -123,22 +63,18 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // ----------------------------------------------------------------------------
 // Example code
 // ----------------------------------------------------------------------------
-const cursor3D = vtkCursor3D.newInstance();
-cursor3D.setFocalPoint([0, 0, 0]);
-cursor3D.setModelBounds([-10, 10, -10, 10, -10, 10]);
-const cursor3DMapper = vtkMapper.newInstance();
-cursor3DMapper.setInputConnection(cursor3D.getOutputPort());
-const cursor3DActor = vtkActor.newInstance();
-cursor3DActor.setMapper(cursor3DMapper);
 
-const sphereSource = vtkSphereSource.newInstance();
-const sphererMapper = vtkMapper.newInstance();
-sphererMapper.setInputConnection(sphereSource.getOutputPort());
-const sphereActor = vtkActor.newInstance();
-sphereActor.setMapper(sphererMapper);
+const lineSource = vtkLineSource.newInstance();
+const actor = vtkActor.newInstance();
+const mapper = vtkMapper.newInstance();
 
-renderer.addActor(cursor3DActor);
-renderer.addActor(sphereActor);
+actor.getProperty().setPointSize(10);
+actor.getProperty().setRepresentation(Representation.POINTS);
+
+actor.setMapper(mapper);
+mapper.setInputConnection(lineSource.getOutputPort());
+
+renderer.addActor(actor);
 renderer.resetCamera();
 renderWindow.render();
 
@@ -147,58 +83,36 @@ renderWindow.render();
 // -----------------------------------------------------------
 
 fullScreenRenderer.addController(controlPanel);
-const focalPointRanges = ['focalPointX', 'focalPointY', 'focalPointZ'].map(
-  (id) => document.getElementById(id)
-);
-const handleFocalPointInput = (e) => {
-  cursor3D.setFocalPoint([
-    focalPointRanges[0].value,
-    focalPointRanges[1].value,
-    focalPointRanges[2].value,
-  ]);
-  renderer.resetCameraClippingRange();
-  renderWindow.render();
-};
-focalPointRanges.forEach((input) =>
-  input.addEventListener('input', handleFocalPointInput)
-);
-const modelBoundsRanges = [
-  'modelBoundsXMin',
-  'modelBoundsXMax',
-  'modelBoundsYMin',
-  'modelBoundsYMax',
-  'modelBoundsZMin',
-  'modelBoundsZMax',
-].map((id) => document.getElementById(id));
-const handleModelBoundsInput = (e) => {
-  cursor3D.setModelBounds([
-    modelBoundsRanges[0].value,
-    modelBoundsRanges[1].value,
-    modelBoundsRanges[2].value,
-    modelBoundsRanges[3].value,
-    modelBoundsRanges[4].value,
-    modelBoundsRanges[5].value,
-  ]);
-  renderer.resetCameraClippingRange();
-  renderWindow.render();
-};
-modelBoundsRanges.forEach((input) =>
-  input.addEventListener('input', handleModelBoundsInput)
-);
-const checkBoxes = [
-  'outline',
-  'axes',
-  'xShadows',
-  'yShadows',
-  'zShadows',
-  'wrap',
-  'translationMode',
-].map((id) => document.getElementById(id));
-const handleCheckBoxInput = (e) => {
-  cursor3D.set({ [e.target.id]: e.target.checked });
-  renderer.resetCameraClippingRange();
-  renderWindow.render();
-};
-checkBoxes.forEach((checkBox) =>
-  checkBox.addEventListener('input', handleCheckBoxInput)
-);
+
+['resolution'].forEach((propertyName) => {
+  document.querySelector(`.${propertyName}`).addEventListener('input', (e) => {
+    const value = Number(e.target.value);
+    lineSource.set({ [propertyName]: value });
+    renderWindow.render();
+  });
+});
+const mapping = 'xyz';
+const points = [
+  [0, 0, 0],
+  [0, 0, 0],
+];
+['x1', 'y1', 'z1', 'x2', 'y2', 'z2'].forEach((propertyName) => {
+  document.querySelector(`.${propertyName}`).addEventListener('input', (e) => {
+    const value = Number(e.target.value);
+    const pointIdx = Number(propertyName[1]);
+    points[pointIdx - 1][mapping.indexOf(propertyName[0])] = value;
+    lineSource.set({ [`point${pointIdx}`]: points[pointIdx - 1] });
+    renderWindow.render();
+  });
+});
+
+// -----------------------------------------------------------
+// Make some variables global so that you can inspect and
+// modify objects in your browser's developer console:
+// -----------------------------------------------------------
+
+global.lineSource = lineSource;
+global.mapper = mapper;
+global.actor = actor;
+global.renderer = renderer;
+global.renderWindow = renderWindow;
